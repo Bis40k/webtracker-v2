@@ -1,19 +1,29 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { Radio } from 'lucide-react'
+import { Radio, Mail, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState<'email' | 'code'>('email')
+  const [step, setStep] = useState<'email' | 'sent'>('email')
   const [sentEmail, setSentEmail] = useState('')
 
-  const handleSendCode = async (e: React.FormEvent) => {
+  // Проверяем, если пришли по magic link
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') {
+        toast.success('Вы успешно вошли!')
+      }
+    })
+
+    return () => subscription?.unsubscribe()
+  }, [])
+
+  const handleSendLink = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) {
       toast.error('Введите почту')
@@ -32,35 +42,10 @@ export default function LoginPage() {
       if (error) throw error
 
       setSentEmail(email)
-      setStep('code')
-      toast.success('Код отправлен на почту')
+      setStep('sent')
+      toast.success('Ссылка отправлена на почту!')
     } catch (error) {
-      toast.error((error as any).message || 'Ошибка при отправке кода')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!code) {
-      toast.error('Введите код')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: sentEmail,
-        token: code,
-        type: 'magiclink',
-      })
-
-      if (error) throw error
-
-      toast.success('Вы вошли!')
-    } catch (error) {
-      toast.error((error as any).message || 'Неверный код')
+      toast.error((error as any).message || 'Ошибка при отправке ссылки')
     } finally {
       setLoading(false)
     }
@@ -82,7 +67,7 @@ export default function LoginPage() {
         </div>
 
         {step === 'email' ? (
-          <form onSubmit={handleSendCode} className="space-y-4">
+          <form onSubmit={handleSendLink} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
                 Email почта
@@ -97,7 +82,7 @@ export default function LoginPage() {
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Мы отправим код подтверждения на вашу почту
+                Мы отправим вам ссылку для входа на вашу почту
               </p>
             </div>
 
@@ -106,55 +91,37 @@ export default function LoginPage() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Отправка...' : 'Отправить код'}
+              {loading ? 'Отправка...' : 'Отправить ссылку'}
             </Button>
           </form>
         ) : (
-          <form onSubmit={handleVerifyCode} className="space-y-4">
-            <div className="text-center mb-6">
-              <p className="text-sm text-muted-foreground">
-                Код отправлен на <br />
-                <span className="font-medium text-foreground">{sentEmail}</span>
+          <div className="space-y-6">
+            <div className="flex justify-center">
+              <CheckCircle className="w-16 h-16 text-green-500" />
+            </div>
+
+            <div className="text-center space-y-3">
+              <h2 className="text-xl font-semibold">Ссылка отправлена!</h2>
+              <p className="text-muted-foreground">
+                На почту <span className="font-medium text-foreground">{sentEmail}</span> отправлена ссылка для входа
               </p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-blue-900 dark:text-blue-100">
+                📧 Нажмите на ссылку в письме или если письмо не пришло, проверьте папку "Спам"
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <label htmlFor="code" className="text-sm font-medium">
-                Код подтверждения
-              </label>
-              <Input
-                id="code"
-                type="text"
-                placeholder="000000"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                disabled={loading}
-                maxLength={6}
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? 'Проверка...' : 'Подтвердить'}
-            </Button>
 
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               className="w-full"
               onClick={() => {
                 setStep('email')
-                setCode('')
+                setEmail('')
               }}
-              disabled={loading}
             >
               Назад
             </Button>
-          </form>
+          </div>
         )}
       </Card>
     </div>
