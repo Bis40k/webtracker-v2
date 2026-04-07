@@ -1,3 +1,6 @@
+import { supabase } from './supabase-client'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+
 export type AppUser = {
   id: string
   email: string
@@ -26,7 +29,6 @@ type BeaconHistory = {
   timestamp: string
 }
 
-const AUTH_KEY = 'webtracker_user'
 const BEACONS_KEY = 'webtracker_beacons'
 const HISTORY_KEY = 'webtracker_history'
 const CHANNEL = 'webtracker-realtime'
@@ -54,16 +56,20 @@ function writeJson<T>(key: string, value: T) {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
-function getUser(): AppUser | null {
-  return readJson<AppUser | null>(AUTH_KEY, null)
+function convertSupabaseUser(user: SupabaseUser | null): AppUser | null {
+  if (!user) return null
+  return {
+    id: user.id,
+    email: user.email || '',
+    displayName: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+  }
 }
 
-function notifyAuth() {
-  const user = getUser()
+function notifyAuth(user: AppUser | null) {
   authListeners.forEach((cb) => cb({ user, isLoading: false }))
 }
 
-function seedData() {
+function seedData(userId: string) {
   const beacons = readJson<Beacon[]>(BEACONS_KEY, [])
   if (beacons.length > 0) return
   const now = new Date().toISOString()
@@ -71,7 +77,7 @@ function seedData() {
     {
       id: crypto.randomUUID(),
       name: 'Demo Beacon',
-      userId: getUser()?.id,
+      userId,
       apiKey: Math.random().toString(36).slice(2, 18),
       lastLat: 55.7558,
       lastLon: 37.6176,
@@ -86,25 +92,28 @@ function seedData() {
 const auth = {
   onAuthStateChanged(cb: (state: { user: AppUser | null; isLoading: boolean }) => void) {
     authListeners.add(cb)
-    cb({ user: getUser(), isLoading: false })
+    
+    // Initial state
+    cb({ user: null, isLoading: true })
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const appUser = convertSupabaseUser(session?.user || null)
+      if (appUser) {
+        seedData(appUser.id)
+      }
+      cb({ user: appUser, isLoading: false })
+      notifyAuth(appUser)
+    })
+
     return () => {
       authListeners.delete(cb)
+      subscription?.unsubscribe()
     }
   },
-  login() {
-    if (!getUser()) {
-      writeJson(AUTH_KEY, {
-        id: crypto.randomUUID(),
-        email: 'local.user@webtracker.app',
-        displayName: 'Local User',
-      } satisfies AppUser)
-      seedData()
-    }
-    notifyAuth()
-  },
-  logout() {
-    localStorage.removeItem(AUTH_KEY)
-    notifyAuth()
+  async logout() {
+    await supabase.auth.signOut()
+    notifyAuth(null)
   },
 }
 

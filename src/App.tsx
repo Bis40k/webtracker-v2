@@ -4,15 +4,16 @@ import {
   RouterProvider, 
   createRouter, 
   createRoute, 
-  createRootRoute
+  createRootRoute,
+  Navigate,
 } from '@tanstack/react-router'
 import { useAuth } from '@/hooks/use-auth'
-import { appClient } from '@/lib/app-client'
 import Dashboard from '@/pages/dashboard'
 import MapPage from '@/pages/map'
 import HistoryPage from '@/pages/history'
 import SecurityPage from '@/pages/security'
 import SettingsPage from '@/pages/settings'
+import LoginPage from '@/pages/login'
 import { Toaster } from 'sonner'
 
 // Root route
@@ -23,6 +24,13 @@ const rootRoute = createRootRoute({
       <Toaster position="top-right" />
     </>
   ),
+})
+
+// Login route
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  component: LoginPage,
 })
 
 // Index route (Dashboard)
@@ -62,6 +70,7 @@ const settingsRoute = createRoute({
 
 // Create router
 const routeTree = rootRoute.addChildren([
+  loginRoute,
   indexRoute,
   mapRoute,
   historyRoute,
@@ -78,12 +87,6 @@ const router = createRouter({
 function AuthGuard(Component: React.ComponentType) {
   return function GuardedComponent() {
     const { user, loading } = useAuth()
-    
-    React.useEffect(() => {
-      if (!loading && !user) {
-        appClient.auth.login()
-      }
-    }, [user, loading])
 
     if (loading) {
       return (
@@ -96,7 +99,9 @@ function AuthGuard(Component: React.ComponentType) {
       )
     }
 
-    if (!user) return null
+    if (!user) {
+      return <Navigate to="/login" />
+    }
 
     return <Component />
   }
