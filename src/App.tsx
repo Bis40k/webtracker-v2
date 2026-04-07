@@ -69,7 +69,10 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
 ])
 
-const router = createRouter({ routeTree })
+const router = createRouter({
+  routeTree,
+  basepath: import.meta.env.BASE_URL.replace(/\/$/, '') || '/',
+})
 
 // Auth Guard HOC
 function AuthGuard(Component: React.ComponentType) {

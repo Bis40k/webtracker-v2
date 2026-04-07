@@ -4,6 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/webtracker-v2/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
