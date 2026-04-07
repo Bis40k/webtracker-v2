@@ -3,13 +3,15 @@ import { supabase } from '@/lib/supabase-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { Radio, Mail, CheckCircle } from 'lucide-react'
+import { Radio, Mail, CheckCircle, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState<'email' | 'sent'>('email')
+  const [mode, setMode] = useState<'choose' | 'link' | 'password' | 'register' | 'link-sent'>('choose')
   const [sentEmail, setSentEmail] = useState('')
 
   // Проверяем, если пришли по magic link
@@ -42,10 +44,67 @@ export default function LoginPage() {
       if (error) throw error
 
       setSentEmail(email)
-      setStep('sent')
+      setMode('link-sent')
       toast.success('Ссылка отправлена на почту!')
     } catch (error) {
       toast.error((error as any).message || 'Ошибка при отправке ссылки')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !password) {
+      toast.error('Введите почту и пароль')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) throw error
+      toast.success('Вы успешно вошли!')
+    } catch (error) {
+      toast.error((error as any).message || 'Ошибка входа')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !password) {
+      toast.error('Введите почту и пароль')
+      return
+    }
+
+    if (password.length < 6) {
+      toast.error('Пароль должен быть минимум 6 символов')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}`,
+        },
+      })
+
+      if (error) throw error
+      toast.success('Аккаунт создан! Проверьте почту для подтверждения')
+      setMode('choose')
+      setEmail('')
+      setPassword('')
+    } catch (error) {
+      toast.error((error as any).message || 'Ошибка регистрации')
     } finally {
       setLoading(false)
     }
@@ -66,7 +125,35 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {step === 'email' ? (
+        {/* Выбор способа входа */}
+        {mode === 'choose' && (
+          <div className="space-y-3">
+            <Button
+              onClick={() => setMode('link')}
+              className="w-full"
+              variant="default"
+            >
+              📧 Вход через ссылку в письме
+            </Button>
+            <Button
+              onClick={() => setMode('password')}
+              className="w-full"
+              variant="outline"
+            >
+              🔑 Вход с паролем
+            </Button>
+            <Button
+              onClick={() => setMode('register')}
+              className="w-full"
+              variant="ghost"
+            >
+              ➕ Создать аккаунт
+            </Button>
+          </div>
+        )}
+
+        {/* Вход по ссылке */}
+        {mode === 'link' && (
           <form onSubmit={handleSendLink} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
@@ -93,8 +180,23 @@ export default function LoginPage() {
             >
               {loading ? 'Отправка...' : 'Отправить ссылку'}
             </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={() => {
+                setMode('choose')
+                setEmail('')
+              }}
+            >
+              Назад
+            </Button>
           </form>
-        ) : (
+        )}
+
+        {/* Ссылка отправлена */}
+        {mode === 'link-sent' && (
           <div className="space-y-6">
             <div className="flex justify-center">
               <CheckCircle className="w-16 h-16 text-green-500" />
@@ -106,7 +208,7 @@ export default function LoginPage() {
                 На почту <span className="font-medium text-foreground">{sentEmail}</span> отправлена ссылка для входа
               </p>
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-blue-900 dark:text-blue-100">
-                📧 Нажмите на ссылку в письме или если письмо не пришло, проверьте папку "Спам"
+                📧 Нажмите на ссылку в письме или проверьте папку "Спам"
               </div>
             </div>
 
@@ -115,13 +217,144 @@ export default function LoginPage() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                setStep('email')
+                setMode('choose')
                 setEmail('')
               }}
             >
               Назад
             </Button>
           </div>
+        )}
+
+        {/* Вход с паролем */}
+        {mode === 'password' && (
+          <form onSubmit={handlePasswordLogin} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="email-password" className="text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email-password"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="password-input" className="text-sm font-medium">
+                Пароль
+              </label>
+              <div className="relative">
+                <Input
+                  id="password-input"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? 'Вход...' : 'Войти'}
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={() => {
+                setMode('choose')
+                setEmail('')
+                setPassword('')
+              }}
+            >
+              Назад
+            </Button>
+          </form>
+        )}
+
+        {/* Регистрация */}
+        {mode === 'register' && (
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="email-register" className="text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email-register"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="password-register" className="text-sm font-medium">
+                Пароль (минимум 6 символов)
+              </label>
+              <div className="relative">
+                <Input
+                  id="password-register"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  minLength={6}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? 'Создание...' : 'Создать аккаунт'}
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={() => {
+                setMode('choose')
+                setEmail('')
+                setPassword('')
+              }}
+            >
+              Назад
+            </Button>
+          </form>
         )}
       </Card>
     </div>
