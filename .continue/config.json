@@ -1,0 +1,44 @@
+{
+    "experimental": {
+      "localRerank": true
+    },
+    "allowAnonymousTelemetry": false,
+    "models": [
+      {
+        "title": "LM Studio",
+        "provider": "openai",
+        "model": "local-model",
+        "apiBase": "http://localhost:1234/v1",
+        "apiType": "openai",
+        "completionOptions": {
+          "temperature": 0.3,
+          "topP": 0.95,
+          "maxTokens": 4096
+        }
+      }
+    ],
+    "tabAutocompleteModel": {
+      "title": "LM Studio (Autocomplete)",
+      "provider": "openai",
+      "model": "local-model",
+      "apiBase": "http://localhost:1234/v1",
+      "completionOptions": {
+        "temperature": 0.2,
+        "maxTokens": 512
+      }
+    },
+    "embeddingsProvider": {
+      "provider": "transformers.js",
+      "model": "Xenova/all-MiniLM-L6-v2"
+    },
+    "reranker": {
+      "name": "local",
+      "model": "mixedbread-ai/mxbai-rerank-base-v1"
+    },
+    "contextProviders": [
+      {
+        "name": "codebase",
+        "params": {}
+      }
+    ]
+  }
