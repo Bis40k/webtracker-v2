@@ -66,22 +66,7 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    setLoading(true)
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}`,
-        },
-      })
 
-      if (error) throw error
-    } catch (error) {
-      toast.error((error as any).message || 'Ошибка при входе через Google')
-      setLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center p-4">
@@ -122,25 +107,6 @@ export default function LoginPage() {
               disabled={loading}
             >
               {loading ? 'Отправка...' : 'Отправить код'}
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Или</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-            >
-              🔐 Войти через Google
             </Button>
           </form>
         ) : (
