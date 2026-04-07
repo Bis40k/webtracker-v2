@@ -87,7 +87,7 @@ function AuthGuard(Component: React.ComponentType) {
         <div className="h-screen w-screen flex items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-primary font-medium animate-pulse">Initializing QuantumGPS...</p>
+            <p className="text-primary font-medium animate-pulse">Инициализация QuantumGPS...</p>
           </div>
         </div>
       )

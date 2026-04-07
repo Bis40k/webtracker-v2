@@ -101,9 +101,9 @@ export default function MapPage() {
           <Card className="border-none shadow-2xl bg-background/95 backdrop-blur-md overflow-hidden flex flex-col h-full">
             <div className="p-4 border-b border-border bg-primary/5">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-lg">Live Beacons</h3>
+                <h3 className="font-bold text-lg">Маяки онлайн</h3>
                 <span className="px-2 py-0.5 bg-primary/20 text-primary text-[10px] rounded-full font-bold">
-                  {beacons.length} ONLINE
+                  {beacons.length} В СЕТИ
                 </span>
               </div>
             </div>
@@ -155,18 +155,18 @@ export default function MapPage() {
                     <h2 className="text-xl font-bold">{currentBeacon.name}</h2>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Live • {currentBeacon.latitude.toFixed(6)}, {currentBeacon.longitude.toFixed(6)}
+                      Онлайн • {currentBeacon.latitude.toFixed(6)}, {currentBeacon.longitude.toFixed(6)}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" className="border-primary/20 hover:bg-primary/5">
                     <History className="w-4 h-4 mr-2" />
-                    History
+                    История
                   </Button>
                   <Button size="sm">
                     <Settings2 className="w-4 h-4 mr-2" />
-                    Manage
+                    Управление
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setSelectedBeacon(null)}>
                     <X className="w-4 h-4" />

@@ -21,11 +21,11 @@ interface LayoutProps {
 }
 
 const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '/' },
-  { label: 'Map', icon: MapIcon, href: '/map' },
-  { label: 'History', icon: History, href: '/history' },
-  { label: 'Security', icon: ShieldCheck, href: '/security' },
-  { label: 'Settings', icon: Settings, href: '/settings' },
+  { label: 'Панель', icon: LayoutDashboard, href: '/' },
+  { label: 'Карта', icon: MapIcon, href: '/map' },
+  { label: 'История', icon: History, href: '/history' },
+  { label: 'Безопасность', icon: ShieldCheck, href: '/security' },
+  { label: 'Настройки', icon: Settings, href: '/settings' },
 ]
 
 export function Layout({ children }: LayoutProps) {
@@ -68,7 +68,7 @@ export function Layout({ children }: LayoutProps) {
               {user?.displayName?.[0] || user?.email?.[0] || 'U'}
             </div>
             <div className="flex flex-col truncate">
-              <span className="text-sm font-medium truncate">{user?.displayName || 'User'}</span>
+              <span className="text-sm font-medium truncate">{user?.displayName || 'Пользователь'}</span>
               <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
             </div>
           </div>
@@ -78,7 +78,7 @@ export function Layout({ children }: LayoutProps) {
             onClick={() => appClient.auth.logout()}
           >
             <LogOut className="w-4 h-4 mr-2" />
-            Logout
+            Выйти
           </Button>
         </div>
       </aside>
@@ -136,7 +136,7 @@ export function Layout({ children }: LayoutProps) {
             onClick={() => appClient.auth.logout()}
           >
             <LogOut className="w-4 h-4 mr-2" />
-            Logout
+            Выйти
           </Button>
         </div>
       </aside>

@@ -107,7 +107,7 @@ export function Map({
                 <div className="flex items-center justify-between border-b pb-2">
                   <span className="font-bold text-primary">{beacon.name}</span>
                   <div className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] rounded-full font-medium">
-                    ACTIVE
+                    АКТИВЕН
                   </div>
                 </div>
                 
@@ -127,7 +127,7 @@ export function Map({
                 </div>
                 
                 <div className="text-[10px] text-muted-foreground pt-2 border-t">
-                  Last updated: {new Date(beacon.lastSeen).toLocaleTimeString()}
+                  Обновлено: {new Date(beacon.lastSeen).toLocaleTimeString()}
                 </div>
               </div>
             </Popup>
