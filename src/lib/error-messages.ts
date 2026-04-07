@@ -50,6 +50,9 @@ export function translateSupabaseError(error: any): string {
   if (message.includes('too many')) {
     return 'Слишком много попыток. Попробуйте позже'
   }
+  if (message.includes('rate limit')) {
+    return 'Лимит отправки писем превышен. Используйте другой email или попробуйте через 15 минут'
+  }
 
   // Если ошибка не переведена, выводим оригинальное сообщение
   return error?.message || 'Неизвестная ошибка при авторизации'
