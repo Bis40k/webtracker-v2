@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase-client'
+import { translateSupabaseError } from '@/lib/error-messages'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -47,7 +48,7 @@ export default function LoginPage() {
       setMode('link-sent')
       toast.success('Ссылка отправлена на почту!')
     } catch (error) {
-      toast.error((error as any).message || 'Ошибка при отправке ссылки')
+      toast.error(translateSupabaseError(error))
     } finally {
       setLoading(false)
     }
@@ -70,7 +71,7 @@ export default function LoginPage() {
       if (error) throw error
       toast.success('Вы успешно вошли!')
     } catch (error) {
-      toast.error((error as any).message || 'Ошибка входа')
+      toast.error(translateSupabaseError(error))
     } finally {
       setLoading(false)
     }
@@ -104,7 +105,7 @@ export default function LoginPage() {
       setEmail('')
       setPassword('')
     } catch (error) {
-      toast.error((error as any).message || 'Ошибка регистрации')
+      toast.error(translateSupabaseError(error))
     } finally {
       setLoading(false)
     }
