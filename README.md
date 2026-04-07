@@ -1,41 +1,151 @@
-# WebTracker (Clean V2)
+# WebTracker 🚀 (V2 - Clean)
 
-WebTracker is a Vite + React + TypeScript app for beacon tracking dashboards, map view, history, and settings.
+WebTracker — это простое веб-приложение для отслеживания GPS-устройств в реальном времени. Приложение показывает положение маячков на карте, историю перемещений и настройки.
 
-This V2 version is cleaned from Blink-specific integration and runs as a standalone frontend:
-- local auth state in `localStorage`
-- local beacon/history storage in `localStorage`
-- local realtime event bus via `BroadcastChannel`
+В этой версии (V2) все переделано с нуля:
+- ✅ Современный стек: Vite + React + TypeScript
+- ✅ Красивый UI с Tailwind CSS
+- ✅ Аутентификация через Supabase (Email OTP)
+- ✅ Карта на Leaflet
+- ✅ Локальное хранилище данных
 
-## Stack
+## 📚 Технологический стек
 
-- Vite
-- React
-- TypeScript
-- Tailwind CSS
-- TanStack Router + React Query
-- Leaflet (`react-leaflet`)
+- **Vite** — быстрый сборщик проектов
+- **React 18** — UI фреймворк
+- **TypeScript** — типизованный JavaScript
+- **Tailwind CSS** — стили
+- **TanStack Router** — маршрутизация
+- **Leaflet** — интерактивные карты
+- **Supabase** — аутентификация и backend
 
-## Run Locally
+## 🎯 Главные возможности
+
+- 📍 **Карта GPS** — видите маячки в реальном времени
+- 📊 **Панель контроля** — может видеть статус устройств (батарея, сигнал)
+- 📋 **История** — как маячки перемещались (если есть логи)
+- 🔐 **Безопасность** — управление доступом
+- ⚙️ **Настройки** — профиль пользователя
+- 🔑 **Вход через почту** — код подтверждения приходит на email
+
+## 🚀 Запуск локально
+
+**Что нужно:**
+- Node.js (v18+)
+- npm
+
+**Командой:**
 
 ```bash
+# Установить зависимости
 npm install
+
+# Запустить dev сервер
 npm run dev
 ```
 
-Default dev URL: `http://localhost:3000`
+Открываете браузер на `http://localhost:3000` и видите форму входа. 
 
-## Scripts
+(При локальном запуске Supabase может не работать полностью, но форма будет видна)
+
+## 📦 Основные скрипты
 
 ```bash
-npm run dev         # start local dev server
-npm run build       # production build
-npm run preview     # preview production build
-npm run lint:types  # TypeScript check
+npm run dev          # Локальное тестирование (http://localhost:3000)
+npm run build        # Сборка для продакшена
+npm run preview      # Посмотреть как выглядит продакшн версия
+npm run lint:types   # Проверить TypeScript ошибки
+npm run lint:js      # Проверить JavaScript (ESLint)
+npm run lint:css     # Проверить CSS
 ```
 
-## Notes
+## 🔐 Аутентификация
 
-- The Netlify function `functions/gps-update.ts` is provider-neutral and currently returns a validated stub response.
-- You can connect this function to any backend/database provider without changing the UI pages.
-- CI runs on GitHub Actions for every push and pull request.
+Вход через **Email OTP** (криптовалютные коды):
+
+1. Вводите вашу почту
+2. На почту приходит 6-значный код
+3. Вводите код в приложение
+4. Готово! Вы вошли ✅
+
+**Технически:** используется Supabase Auth с Magic Link коды.
+
+## 📁 Структура проекта
+
+```
+src/
+├── components/      # React компоненты (UI, карта, лайаут)
+├── pages/           # Страницы (Dashboard, Map, History и т.д.)
+├── hooks/           # Custom React hooks (useAuth)
+├── lib/             # Утилиты (supabase-client, app-client)
+└── styles/          # CSS файлы
+
+functions/           # Serverless функции (Netlify)
+public/             # Статичные файлы
+```
+
+## 🌐 Живое приложение (Production)
+
+Приложение развернуто на GitHub Pages:
+
+👉 **Ссылка:** https://bis40k.github.io/webtracker-v2/
+
+Просто откройте в браузере и попробуйте! 📱
+
+## 🔧 Переменные окружения
+
+Создано файл `.env.local`:
+
+```env
+VITE_APP_NAME='WebTracker'
+VITE_SUPABASE_URL=https://jkcpydwgqgccqndwfmnz.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_TOL1GevbUn7ojEfr3OZ3gw_Pk_KkWpI
+```
+
+(Эти значения уже заполнены для Supabase проекта WebTracking)
+
+## 💾 Где сохраняются данные?
+
+- **Пользователи** → Supabase Auth (облако)
+- **Маячки и история** → localStorage браузера (локально)
+- **Real-time обновления** → BroadcastChannel API (между вкладками)
+
+Можно позже подключить Supabase Database для синхронизации в облаке.
+
+## 🚀 Как это работает?
+
+1. **Пользователь входит через почту**
+2. **Supabase отправляет код на email**
+3. **Пользователь подтверждает** → session сохраняется
+4. **Приложение показывает Dashboard** с маячками
+5. **Можно добавлять маячки, смотреть карту, историю**
+
+## 📝 Заметки для разработки
+
+- Данные маячков хранятся в `localStorage` (можно сделать на Supabase потом)
+- GPS координаты приходят с API или вручную (демо данные есть)
+- Карта использует Free Tile Layer от OpenStreetMap
+- Стили сделаны на Tailwind (легко кастомизировать)
+
+## 🐛 Если что-то не работает
+
+1. Откройте **F12** (DevTools) и посмотрите Console
+2. Проверьте, включен ли Email провайдер в Supabase
+3. Убедитесь, что `.env.local` имеет корректные credentials
+4. Попробуйте `npm install` и `npm run dev` заново
+
+## 🎓 Для студента
+
+Это учебный проект, поэтому код максимально понятный:
+- TypeScript для типизации (безопаснее)
+- React Hooks (современный подход)
+- Компоненты маленькие и переиспользуемые
+- Комментарии где нужны
+
+Можете запустить, добавить свои маячки, модифицировать UI — все работает! 💪
+
+---
+
+**Автор:** Студент-разработчик  
+**Лицензия:** MIT  
+**Дата:** 2026 год
