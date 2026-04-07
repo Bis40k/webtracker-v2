@@ -1,59 +1,41 @@
-# Enhanced Vite React TypeScript Template
+# WebTracker (Clean V2)
 
-This template includes built-in detection for missing CSS variables between your Tailwind config and CSS files.
+WebTracker is a Vite + React + TypeScript app for beacon tracking dashboards, map view, history, and settings.
 
-## Features
+This V2 version is cleaned from Blink-specific integration and runs as a standalone frontend:
+- local auth state in `localStorage`
+- local beacon/history storage in `localStorage`
+- local realtime event bus via `BroadcastChannel`
 
-- **CSS Variable Detection**: Automatically detects if CSS variables referenced in `tailwind.config.cjs` are defined in `src/index.css`
-- **Enhanced Linting**: Includes ESLint, Stylelint, and custom CSS variable validation
-- **Shadcn/ui**: Pre-configured with all Shadcn components
-- **Modern Stack**: Vite + React + TypeScript + Tailwind CSS
+## Stack
 
-## Available Scripts
+- Vite
+- React
+- TypeScript
+- Tailwind CSS
+- TanStack Router + React Query
+- Leaflet (`react-leaflet`)
+
+## Run Locally
 
 ```bash
-# Run all linting (includes CSS variable check)
-npm run lint
-
-# Check only CSS variables
-npm run check:css-vars
-
-# Individual linting
-npm run lint:js    # ESLint
-npm run lint:css   # Stylelint
+npm install
+npm run dev
 ```
 
-## CSS Variable Detection
+Default dev URL: `http://localhost:3000`
 
-The template includes a custom script that:
+## Scripts
 
-1. **Parses `tailwind.config.cjs`** to find all `var(--variable)` references
-2. **Parses `src/index.css`** to find all defined CSS variables (`--variable:`)
-3. **Cross-references** them to find missing definitions
-4. **Reports undefined variables** with clear error messages
-
-### Example Output
-
-When CSS variables are missing:
-```
-❌ Undefined CSS variables found in tailwind.config.cjs:
-   --sidebar-background
-   --sidebar-foreground
-   --sidebar-primary
-
-Add these variables to src/index.css
+```bash
+npm run dev         # start local dev server
+npm run build       # production build
+npm run preview     # preview production build
+npm run lint:types  # TypeScript check
 ```
 
-When all variables are defined:
-```
-✅ All CSS variables in tailwind.config.cjs are defined
-```
+## Notes
 
-## How It Works
-
-The detection happens during the `npm run lint` command, which will:
-- Exit with error code 1 if undefined variables are found
-- Show exactly which variables need to be added to your CSS file
-- Integrate seamlessly with your development workflow
-
-This prevents runtime CSS issues where Tailwind classes reference undefined CSS variables.
+- The Netlify function `functions/gps-update.ts` is provider-neutral and currently returns a validated stub response.
+- You can connect this function to any backend/database provider without changing the UI pages.
+- CI runs on GitHub Actions for every push and pull request.
